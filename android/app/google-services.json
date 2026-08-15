@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "882473022030",
+    "project_id": "turfix-turf-booking",
+    "storage_bucket": "turfix-turf-booking.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:882473022030:android:951465ce584b1c133e091f",
+        "android_client_info": {
+          "package_name": "com.example.turfix"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClVaQwM3tS0rsOk7Nek2PpkdPqDxiwlLU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:882473022030:android:5289f4b3c10e01283e091f",
+        "android_client_info": {
+          "package_name": "com.example.turfix_owner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClVaQwM3tS0rsOk7Nek2PpkdPqDxiwlLU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
