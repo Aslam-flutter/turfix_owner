@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -442,12 +443,14 @@ class AddTurfScreen extends StatelessWidget {
                 description: descCtr.text.trim(),
                 location: locationCtr.text.trim(),
                 pricePerHour: double.parse(priceCtr.text.trim()),
-                openingTime: addProvider.openigTime.length < 10
-                    ? addProvider.openigTime
-                    : '5:00 AM',
-                closingTime: addProvider.closingTime.length < 10
-                    ? addProvider.closingTime
-                    : '12:00 AM',
+                openingTime: addProvider
+                    .parseTime(addProvider.openigTime)
+                    .format(context),
+
+                closingTime: addProvider
+                    .parseTime(addProvider.closingTime)
+                    .format(context),
+
                 phoneNumber: phoneNumberCtr.text.trim(),
                 turfImages: [],
                 sportTypes: addturfProvider.selectedSports,
@@ -460,7 +463,20 @@ class AddTurfScreen extends StatelessWidget {
                 latitude: locationProvider.latitude,
                 longtitude: locationProvider.longitude,
               );
-              await FirestoreServices().addTurf(turfModel);
+
+              //////////////////////////////////////////////////////////////////
+              final firestore = FirebaseFirestore.instance;
+
+              final turfRef = firestore.collection('turfs').doc();
+
+              await turfRef.set(turfModel.toJson());
+
+              await addProvider.createTurfSlots(
+                turfId: turfRef.id,
+                openingTime: turfModel.openingTime,
+                closingTime: turfModel.closingTime,
+                pricePerHour: turfModel.pricePerHour,
+              );
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => OwnerMainScreen()),
@@ -471,6 +487,8 @@ class AddTurfScreen extends StatelessWidget {
                 message: 'Turf added successfully',
                 backgroundColor: Colors.green,
               );
+
+              ///////////////////////////////////////////////////////////////////
               provider.load(false);
             },
             style: ElevatedButton.styleFrom(
