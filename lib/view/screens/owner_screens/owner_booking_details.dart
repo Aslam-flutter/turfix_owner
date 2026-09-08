@@ -269,7 +269,7 @@ class SectionTile extends StatelessWidget {
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.03),
+            color: Colors.black.withValues(alpha: .03),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -281,7 +281,7 @@ class SectionTile extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: primary.withOpacity(.1),
+              color: primary.withValues(alpha: .1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: primary),
@@ -308,7 +308,7 @@ class SectionTile extends StatelessWidget {
             ),
           ),
 
-          if (trailing != null) trailing!,
+          ?trailing,
         ],
       ),
     );

@@ -211,7 +211,7 @@ class ProfileMenuTile extends StatelessWidget {
           border: Border.all(color: Colors.grey.shade200),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(.03),
+              color: Colors.black.withValues(alpha: .03),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -223,7 +223,7 @@ class ProfileMenuTile extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: primary.withOpacity(.1),
+                color: primary.withValues(alpha: .1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: primary, size: 22),

@@ -76,7 +76,7 @@ class MyTurfsScreen extends StatelessWidget {
                       border: Border.all(color: Colors.grey.shade200),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(.04),
+                          color: Colors.black.withValues(alpha: .04),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -156,8 +156,8 @@ class MyTurfsScreen extends StatelessWidget {
                                     ),
                                     decoration: BoxDecoration(
                                       color: turfDetails['isTurfActive']
-                                          ? primary.withOpacity(.12)
-                                          : Colors.red.withOpacity(.12),
+                                          ? primary.withValues(alpha: .12)
+                                          : Colors.red.withValues(alpha: .12),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(

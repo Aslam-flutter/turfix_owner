@@ -206,7 +206,7 @@ class AddTurfScreen extends StatelessWidget {
             const SizedBox(height: 8),
 
             Consumer<SportsSelectingProvider>(
-              builder: (_, provider, __) {
+              builder: (_, provider, _) {
                 return Wrap(
                   spacing: 10,
                   runSpacing: 10,
@@ -247,7 +247,7 @@ class AddTurfScreen extends StatelessWidget {
 
             const SizedBox(height: 8),
             Consumer<SportsSelectingProvider>(
-              builder: (_, provider, __) {
+              builder: (_, provider, _) {
                 return Wrap(
                   spacing: 10,
                   runSpacing: 10,

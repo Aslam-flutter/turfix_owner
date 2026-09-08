@@ -70,7 +70,7 @@ class EarningsGraphScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(.04),
+                  color: Colors.black.withValues(alpha: .04),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -170,7 +170,7 @@ class EarningsGraphScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.04),
+            color: Colors.black.withValues(alpha: .04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -180,7 +180,7 @@ class EarningsGraphScreen extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 22,
-            backgroundColor: color.withOpacity(.12),
+            backgroundColor: color.withValues(alpha: .12),
             child: Icon(icon, color: color),
           ),
 

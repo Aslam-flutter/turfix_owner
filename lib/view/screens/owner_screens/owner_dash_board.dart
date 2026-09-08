@@ -168,7 +168,7 @@ class StatCard extends StatelessWidget {
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.03),
+            color: Colors.black.withValues(alpha: .03),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -179,7 +179,7 @@ class StatCard extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 18,
-            backgroundColor: color.withOpacity(.12),
+            backgroundColor: color.withValues(alpha: .12),
             child: Icon(icon, color: color, size: 20),
           ),
 
@@ -239,7 +239,7 @@ class BookingTile extends StatelessWidget {
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.03),
+            color: Colors.black.withValues(alpha: .03),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -249,7 +249,7 @@ class BookingTile extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundColor: const Color(0xff16A34A).withOpacity(.12),
+            backgroundColor: const Color(0xff16A34A).withValues(alpha: .12),
             child: const Icon(Icons.person, color: Color(0xff16A34A)),
           ),
 
@@ -284,7 +284,7 @@ class BookingTile extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(.12),
+              color: statusColor.withValues(alpha: .12),
               borderRadius: BorderRadius.circular(30),
             ),
             child: Text(

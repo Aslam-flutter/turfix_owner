@@ -38,7 +38,7 @@ class _OwnerMainScreenState extends State<OwnerMainScreen> {
               borderRadius: BorderRadius.circular(22),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(.18),
+                  color: Colors.black.withValues(alpha: .18),
                   blurRadius: 18,
                   offset: const Offset(0, 8),
                 ),

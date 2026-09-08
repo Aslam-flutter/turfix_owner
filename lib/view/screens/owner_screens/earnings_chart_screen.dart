@@ -92,7 +92,7 @@ class EarningsChart extends StatelessWidget {
 
             belowBarData: BarAreaData(
               show: true,
-              color: const Color(0xff16A34A).withOpacity(.15),
+              color: const Color(0xff16A34A).withValues(alpha: .15),
             ),
           ),
         ],

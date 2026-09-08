@@ -243,7 +243,7 @@ class OwnerTurfDetailsScreen extends StatelessWidget {
                       border: Border.all(color: Colors.grey.shade200),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(.03),
+                          color: Colors.black.withValues(alpha: .03),
                           blurRadius: 8,
                           offset: const Offset(0, 3),
                         ),
@@ -500,7 +500,7 @@ class OwnerTurfDetailsScreen extends StatelessWidget {
                             width: 33,
                             height: 33,
                             decoration: BoxDecoration(
-                              color: Color(0xff16A34A).withOpacity(.1),
+                              color: Color(0xff16A34A).withValues(alpha: .1),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -578,7 +578,7 @@ class InfoItem extends StatelessWidget {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: primary.withOpacity(.1),
+                color: primary.withValues(alpha: .1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: primary, size: 30),
