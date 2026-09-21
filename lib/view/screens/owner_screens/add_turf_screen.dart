@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:turfix_owner/core/services/firestore_services.dart';
 import 'package:turfix_owner/model/turf_model.dart';
 import 'package:turfix_owner/view/screens/owner_screens/owner_main_screen.dart';
 import 'package:turfix_owner/view_model/add_turf_provider.dart';
@@ -59,14 +58,81 @@ class AddTurfScreen extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            Row(
-              children: const [
-                Expanded(child: UploadImageBox()),
-                SizedBox(width: 12),
-                Expanded(child: UploadImageBox()),
-                SizedBox(width: 12),
-                Expanded(child: UploadImageBox()),
-              ],
+            // Row(
+            //   children: const [
+            //     Expanded(child: UploadImageBox()),
+            //     SizedBox(width: 12),
+            //     Expanded(child: UploadImageBox()),
+            //     SizedBox(width: 12),
+            //     Expanded(child: UploadImageBox()),
+            //   ],
+            // ),
+            Consumer<AddTurfProvider>(
+              builder: (context, provider, child) {
+                return Row(
+                  children: List.generate(3, (index) {
+                    final image = provider.selectedImages[index];
+
+                    return Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(right: index == 2 ? 0 : 8),
+                        child: GestureDetector(
+                          onTap: () {
+                            provider.pickAndUploadImage(index);
+                          },
+                          child: Container(
+                            height: 62,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: image == null
+                                ? const Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.add_a_photo_outlined,
+                                        color: Colors.grey,
+                                      ),
+                                      SizedBox(height: 3),
+                                      Text(
+                                        'Upload',
+                                        style: TextStyle(
+                                          fontSize: 9,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : FutureBuilder(
+                                    future: image.readAsBytes(),
+                                    builder: (context, snapshot) {
+                                      if (!snapshot.hasData) {
+                                        return const Center(
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        );
+                                      }
+
+                                      return ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.memory(
+                                          snapshot.data!,
+                                          width: double.infinity,
+                                          height: double.infinity,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                );
+              },
             ),
 
             const SizedBox(height: 24),
@@ -437,6 +503,17 @@ class AddTurfScreen extends StatelessWidget {
           child: ElevatedButton(
             onPressed: () async {
               provider.load(true);
+              final providerr = context.read<AddTurfProvider>();
+
+              if (!providerr.hasThreeImages) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please upload all 3 turf images'),
+                  ),
+                );
+
+                return;
+              }
               TurfModel turfModel = TurfModel(
                 ownerId: FirebaseAuth.instance.currentUser!.uid,
                 turfName: turfNameCtr.text.trim(),
@@ -452,7 +529,7 @@ class AddTurfScreen extends StatelessWidget {
                     .format(context),
 
                 phoneNumber: phoneNumberCtr.text.trim(),
-                turfImages: [],
+                turfImages: providerr.uploadedImageUrls,
                 sportTypes: addturfProvider.selectedSports,
                 facilities: addturfProvider.selectedFacilities,
                 gameFomats: addturfProvider.selectedGameFormats,
@@ -519,45 +596,45 @@ class AddTurfScreen extends StatelessWidget {
   }
 }
 
-class UploadImageBox extends StatelessWidget {
-  const UploadImageBox({super.key});
+// class UploadImageBox extends StatelessWidget {
+//   const UploadImageBox({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<AddTurfProvider>();
-    return InkWell(
-      onTap: () {
-        provider.pickAndUploadImages();
-      },
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        height: 100,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade300),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.add_a_photo_outlined,
-              size: 28,
-              color: Colors.grey.shade600,
-            ),
+//   @override
+//   Widget build(BuildContext context) {
+//     final provider = context.watch<AddTurfProvider>();
+//     return InkWell(
+//       onTap: () {
+//         provider.pickAndUploadImages(context);
+//       },
+//       borderRadius: BorderRadius.circular(16),
+//       child: Container(
+//         height: 100,
+//         decoration: BoxDecoration(
+//           color: Colors.white,
+//           borderRadius: BorderRadius.circular(16),
+//           border: Border.all(color: Colors.grey.shade300),
+//         ),
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Icon(
+//               Icons.add_a_photo_outlined,
+//               size: 28,
+//               color: Colors.grey.shade600,
+//             ),
 
-            const SizedBox(height: 8),
+//             const SizedBox(height: 8),
 
-            Text(
-              "Upload",
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+//             Text(
+//               "Upload",
+//               style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 class CustomTextField extends StatelessWidget {
   final String hint;

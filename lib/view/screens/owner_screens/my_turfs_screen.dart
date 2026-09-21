@@ -88,7 +88,7 @@ class MyTurfsScreen extends StatelessWidget {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(14),
                           child: Image.network(
-                            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwq1O-qC-iZVN_4hkTobZRzKrsWYBbmqrrgls7NwcKUSzQuwJLvMC3xcU&s=10",
+                            turfDetails['turfImages'][0],
                             width: 90,
                             height: 90,
                             fit: BoxFit.cover,
@@ -186,31 +186,30 @@ class MyTurfsScreen extends StatelessWidget {
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  Expanded(
-                                    child: OutlinedButton.icon(
-                                      onPressed: () {},
-                                      icon: const Icon(
-                                        Icons.edit_outlined,
-                                        size: 18,
-                                        color: primary,
-                                      ),
-                                      label: const Text(
-                                        "Edit",
-                                        style: TextStyle(color: primary),
-                                      ),
-                                      style: OutlinedButton.styleFrom(
-                                        side: const BorderSide(color: primary),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                                  // Expanded(
+                                  //   child: OutlinedButton.icon(
+                                  //     onPressed: () {},
+                                  //     icon: const Icon(
+                                  //       Icons.edit_outlined,
+                                  //       size: 18,
+                                  //       color: primary,
+                                  //     ),
+                                  //     label: const Text(
+                                  //       "Edit",
+                                  //       style: TextStyle(color: primary),
+                                  //     ),
+                                  //     style: OutlinedButton.styleFrom(
+                                  //       side: const BorderSide(color: primary),
+                                  //       shape: RoundedRectangleBorder(
+                                  //         borderRadius: BorderRadius.circular(
+                                  //           10,
+                                  //         ),
+                                  //       ),
+                                  //     ),
+                                  //   ),
+                                  // ),
 
-                                  const SizedBox(width: 10),
-
+                                  // const SizedBox(width: 10),
                                   Expanded(
                                     child: OutlinedButton.icon(
                                       onPressed: () {
@@ -259,36 +258,6 @@ class MyTurfsScreen extends StatelessWidget {
                 );
               },
             );
-
-            // SizedBox(height: 16),
-
-            // TurfCard(
-            //   image:
-            //       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwq1O-qC-iZVN_4hkTobZRzKrsWYBbmqrrgls7NwcKUSzQuwJLvMC3xcU&s=10",
-
-            //   name: "Kick Off Turf",
-            //   location: "Kozhikode, Kerala",
-            //   price: "₹1000",
-            //   bookings: "25 Bookings This Week",
-            //   isActive: true,
-            // ),
-
-            // SizedBox(height: 16),
-
-            // TurfCard(
-            //   image:
-            //       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwq1O-qC-iZVN_4hkTobZRzKrsWYBbmqrrgls7NwcKUSzQuwJLvMC3xcU&s=10",
-
-            //   name: "Sports Hub Turf",
-            //   location: "Kozhikode, Kerala",
-            //   price: "₹1400",
-            //   bookings: "18 Bookings This Week",
-            //   isActive: false,
-            // ),
-
-            // SizedBox(height: 100),
-            //   ],
-            // );
           },
         ),
       ),
@@ -306,29 +275,3 @@ class MyTurfsScreen extends StatelessWidget {
     );
   }
 }
-
-// class TurfCard extends StatelessWidget {
-//   final String image;
-//   final String name;
-//   final String location;
-//   final String price;
-//   final String bookings;
-//   final bool isActive;
-
-//   const TurfCard({
-//     super.key,
-//     required this.image,
-//     required this.name,
-//     required this.location,
-//     required this.price,
-//     required this.bookings,
-//     required this.isActive,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     const primary = Color(0xff16A34A);
-
-//     return
-//   }
-// }
