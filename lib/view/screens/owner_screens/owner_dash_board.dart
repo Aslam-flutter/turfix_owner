@@ -1,13 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:turfix_owner/view/screens/owner_screens/add_turf_screen.dart';
+import 'package:turfix_owner/view_model/common_provider.dart';
 
 class OwnerDashboardScreen extends StatelessWidget {
   const OwnerDashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.read<CommonProvider>();
     final now = DateTime.now();
 
     final todayStart = DateTime(now.year, now.month, now.day);
@@ -120,7 +124,7 @@ class OwnerDashboardScreen extends StatelessWidget {
                 const SizedBox(height: 30),
 
                 const Text(
-                  "Today's Bookings",
+                  "Bookings",
                   style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
                 ),
 
@@ -150,62 +154,91 @@ class OwnerDashboardScreen extends StatelessWidget {
 
                     final allBookings = snapshot.data!.docs;
 
-                    // Today's date
-                    final now = DateTime.now();
-
-                    final todayStart = DateTime(now.year, now.month, now.day);
-
-                    final tomorrowStart = todayStart.add(
-                      const Duration(days: 1),
-                    );
-
-                    // Filter today's bookings
-                    final todayBookings = allBookings.where((booking) {
-                      final data = booking.data();
-
-                      final timestamp = data['date'];
-
-                      if (timestamp == null || timestamp is! Timestamp) {
-                        return false;
-                      }
-
-                      final bookingDate = timestamp.toDate();
-
-                      return bookingDate.isAfter(
-                            todayStart.subtract(
-                              const Duration(milliseconds: 1),
-                            ),
-                          ) &&
-                          bookingDate.isBefore(tomorrowStart);
-                    }).toList();
-
-                    // No bookings today
-                    if (todayBookings.isEmpty) {
-                      return const Text("No today's bookings available");
-                    }
                     return ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: todayBookings.length,
+                      itemCount: allBookings.length < 10
+                          ? allBookings.length
+                          : 10,
                       itemBuilder: (context, index) {
-                        final data = todayBookings[index].data();
+                        final booking = allBookings[index].data();
+
+                        // -------------------------
+                        // Booking details
+                        // -------------------------
+
+                        final customerName =
+                            booking['customerName']?.toString() ??
+                            'Unknown Customer';
+
+                        final sport =
+                            booking['sport']?.toString() ?? 'Unknown Sport';
+
+                        final status = provider.getDisplayStatus(booking);
+
+                        // -------------------------
+                        // Status color
+                        // -------------------------
+
                         Color statusColor;
 
-                        switch ('Completed') {
-                          case "Completed":
+                        switch (status) {
+                          case 'Confirmed':
+                            statusColor = Colors.orange;
+                            break;
+
+                          case 'Playing':
                             statusColor = Colors.green;
                             break;
-                          case "Cancelled":
-                            statusColor = Colors.red;
+
+                          case 'Completed':
+                            statusColor = Colors.grey;
                             break;
+
                           default:
-                            statusColor = Colors.orange;
+                            statusColor = Colors.grey;
                         }
-                        final booking = data[index].data();
-                        if (booking.isEmpty) {
-                          return Text('No booking details');
+
+                        // -------------------------
+                        // Booking time
+                        // -------------------------
+
+                        String time = 'Time unavailable';
+
+                        if (booking['startAt'] is Timestamp &&
+                            booking['endAt'] is Timestamp) {
+                          final startAt = (booking['startAt'] as Timestamp)
+                              .toDate();
+
+                          final endAt = (booking['endAt'] as Timestamp)
+                              .toDate();
+
+                          time =
+                              '${DateFormat('hh:mm a').format(startAt)} - '
+                              '${DateFormat('hh:mm a').format(endAt)}';
                         }
+
+                        // -------------------------
+                        // Booking created time
+                        // -------------------------
+
+                        String bookedAt = '';
+
+                        if (booking['createdAt'] is Timestamp) {
+                          final createdAt = (booking['createdAt'] as Timestamp)
+                              .toDate();
+
+                          bookedAt = DateFormat(
+                            'd MMM • hh:mm a',
+                          ).format(createdAt);
+                        }
+
+                        // -------------------------
+                        // UI
+                        // -------------------------
+
                         return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -220,7 +253,9 @@ class OwnerDashboardScreen extends StatelessWidget {
                             ],
                           ),
                           child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Customer icon
                               CircleAvatar(
                                 radius: 24,
                                 backgroundColor: const Color(
@@ -234,43 +269,80 @@ class OwnerDashboardScreen extends StatelessWidget {
 
                               const SizedBox(width: 14),
 
+                              // Booking information
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'aslam',
+                                      customerName,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
 
-                                    const SizedBox(height: 4),
+                                    const SizedBox(height: 5),
 
-                                    Text(
-                                      'sport',
-                                      style: TextStyle(
-                                        color: Colors.grey.shade600,
-                                      ),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.sports,
+                                          size: 16,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          sport,
+                                          style: TextStyle(
+                                            color: Colors.grey.shade600,
+                                          ),
+                                        ),
+                                      ],
                                     ),
 
-                                    const SizedBox(height: 4),
+                                    const SizedBox(height: 5),
 
-                                    Text(
-                                      '10-12',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.grey.shade500,
-                                      ),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.access_time,
+                                          size: 16,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          time,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.grey.shade600,
+                                          ),
+                                        ),
+                                      ],
                                     ),
+
+                                    if (bookedAt.isNotEmpty) ...[
+                                      const SizedBox(height: 5),
+                                      Text(
+                                        'Booked $bookedAt',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.grey.shade500,
+                                        ),
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),
 
+                              const SizedBox(width: 8),
+
+                              // Status
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
+                                  horizontal: 10,
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
@@ -278,9 +350,10 @@ class OwnerDashboardScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(30),
                                 ),
                                 child: Text(
-                                  'upcoming',
+                                  status,
                                   style: TextStyle(
                                     color: statusColor,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),

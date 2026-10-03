@@ -42,6 +42,36 @@ class CommonProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  String getDisplayStatus(Map<String, dynamic> booking) {
+    // Cancellation is stored permanently in Firebase
+    if (booking['status']?.toString().toLowerCase() == 'cancelled') {
+      return 'Cancelled';
+    }
+
+    final startAt = booking['startAt'];
+
+    final endAt = booking['endAt'];
+
+    if (startAt is! Timestamp || endAt is! Timestamp) {
+      return 'Confirmed';
+    }
+
+    final now = DateTime.now();
+
+    final startTime = startAt.toDate();
+    final endTime = endAt.toDate();
+
+    if (now.isBefore(startTime)) {
+      return 'Confirmed';
+    }
+
+    if (now.isBefore(endTime)) {
+      return 'Playing';
+    }
+
+    return 'Completed';
+  }
+
   // Future<double> getOwnerTotalAmount(String ownerId) async {
   //   try {
   //     final snapshot = await FirebaseFirestore.instance

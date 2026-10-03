@@ -16,6 +16,7 @@ class TurfModel {
   final double? longtitude;
 
   final int? reviewCount;
+  final int? ratingTotal;
 
   final List<String> turfImages;
   final List<String> sportTypes;
@@ -36,6 +37,7 @@ class TurfModel {
     required this.sportTypes,
     required this.facilities,
     required this.gameFomats,
+    this.ratingTotal,
     this.bookingCount,
     this.isTurfActive,
     this.rating,
@@ -62,6 +64,7 @@ class TurfModel {
       bookingCount: 0,
       rating: 0.00,
       reviewCount: 0,
+      ratingTotal: 0,
 
       turfImages: List<String>.from(fromJson['turfImages'] ?? []),
 
@@ -94,6 +97,7 @@ class TurfModel {
       'reviewCount': reviewCount,
       'longtitude': longtitude,
       'latitude': latitude,
+      'ratingTotal': ratingTotal,
     };
   }
 }

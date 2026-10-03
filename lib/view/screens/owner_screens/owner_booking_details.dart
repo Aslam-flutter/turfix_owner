@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:turfix_owner/view/screens/owner_screens/owner_main_screen.dart';
 
 class OwnerBookingDetailsScreen extends StatelessWidget {
   const OwnerBookingDetailsScreen({super.key});
@@ -15,7 +16,12 @@ class OwnerBookingDetailsScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => OwnerMainScreen()),
+            );
+          },
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
         ),
         title: const Text(

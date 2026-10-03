@@ -4,113 +4,118 @@ import 'package:geolocator/geolocator.dart';
 import 'package:turfix_owner/widgets/scaffold_messanger.dart';
 
 class GeoLocatorProvider extends ChangeNotifier {
-  // GeoLocatorProvider() {
-  //   getCurrentLocation();
-  // }
   String address = 'Get turf location.';
 
   double? latitude;
   double? longitude;
 
   bool isLoading = false;
-  BuildContext? context;
 
-  Future<void> getCurrentLocation() async {
+  Future<void> getCurrentLocation(BuildContext context) async {
     isLoading = true;
     address = 'Getting your location...';
     notifyListeners();
 
     try {
-      // 1. Check whether location service is enabled
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      // 1. Check location service
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
       if (!serviceEnabled) {
         address = 'Your location is not found';
+
         AppMessenger.customScaffoldMessenger(
-          context!,
+          context,
           message: 'Please enable location services.',
         );
-        isLoading = false;
-        notifyListeners();
+
         return;
       }
 
       // 2. Check permission
       LocationPermission permission = await Geolocator.checkPermission();
 
-      // 3. Request permission if not granted
+      // 3. Request permission
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-
-        if (permission == LocationPermission.denied) {
-          // address = 'Location permission denied.';
-          address = 'Your location is not found';
-          AppMessenger.customScaffoldMessenger(
-            context!,
-            message: 'Location permission denied.',
-          );
-          isLoading = false;
-          notifyListeners();
-          return;
-        }
       }
 
-      // 4. Handle permanently denied permission
-      if (permission == LocationPermission.deniedForever) {
-        // address =
-        //     'Location permission permanently denied. '
-        //     'Please enable it from settings.';
+      if (permission == LocationPermission.denied) {
         address = 'Your location is not found';
+
         AppMessenger.customScaffoldMessenger(
-          context!,
+          context,
+          message: 'Location permission denied.',
+        );
+
+        return;
+      }
+
+      // 4. Permanently denied
+      if (permission == LocationPermission.deniedForever) {
+        address = 'Your location is not found';
+
+        AppMessenger.customScaffoldMessenger(
+          context,
           message:
               'Location permission permanently denied. '
               'Please enable it from settings.',
         );
-        isLoading = false;
-        notifyListeners();
+
         return;
       }
 
       // 5. Get current position
-      final Position position = await Geolocator.getCurrentPosition(
+      final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
         ),
       );
 
+      // Save coordinates
       latitude = position.latitude;
       longitude = position.longitude;
 
-      // 6. Convert coordinates to address
-      final Geocoding geocoding = Geocoding();
-      final List<Placemark> placemarks = await geocoding
-          .placemarkFromCoordinates(position.latitude, position.longitude);
+      debugPrint('LATITUDE: $latitude');
 
-      if (placemarks.isNotEmpty) {
-        final Placemark place = placemarks.first;
+      debugPrint('LONGITUDE: $longitude');
 
-        final String result = [
-          place.locality,
-          place.administrativeArea,
-          place.postalCode,
-          place.country,
-        ].where((e) => e != null && e.isNotEmpty).join(', ');
+      // 6. Reverse geocoding
+      try {
+        final geocoding = Geocoding();
 
-        address = result;
-        isLoading = false;
-        notifyListeners();
-      } else {
+        final placemarks = await geocoding.placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+
+        if (placemarks.isNotEmpty) {
+          final place = placemarks.first;
+
+          final result = [
+            place.locality,
+            place.administrativeArea,
+            place.postalCode,
+            place.country,
+          ].where((e) => e != null && e.isNotEmpty).join(', ');
+
+          address = result.isNotEmpty ? result : 'Address not found';
+        } else {
+          address = 'Address not found';
+        }
+      } catch (e) {
+        // Address lookup failed,
+        // but GPS coordinates are still valid.
+        debugPrint('Geocoding error: $e');
+
         address = 'Address not found';
-        isLoading = false;
-        notifyListeners();
       }
     } catch (e) {
       address = 'Unable to get location.';
-      isLoading = false;
-      notifyListeners();
 
       debugPrint('Location error: $e');
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
   }
 }

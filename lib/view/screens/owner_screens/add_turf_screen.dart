@@ -234,7 +234,7 @@ class AddTurfScreen extends StatelessWidget {
                 ),
                 suffixIcon: IconButton(
                   onPressed: () {
-                    locationProvider.getCurrentLocation();
+                    locationProvider.getCurrentLocation(context);
                   },
                   icon: locationProvider.isLoading
                       ? SizedBox(

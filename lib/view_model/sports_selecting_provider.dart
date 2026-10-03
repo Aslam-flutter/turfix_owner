@@ -5,10 +5,10 @@ import 'package:turfix_owner/model/sport_model.dart';
 class SportsSelectingProvider extends ChangeNotifier {
   List<SportModel> sports = [
     SportModel(name: "Football", icon: Icons.sports_soccer),
-    SportModel(name: "Cricket", icon: Icons.sports_cricket),
-    SportModel(name: "Badminton", icon: Icons.sports_tennis),
-    SportModel(name: "Volleyball", icon: Icons.sports_volleyball),
-    SportModel(name: "Tennis", icon: Icons.sports_tennis),
+    // SportModel(name: "Cricket", icon: Icons.sports_cricket),
+    // SportModel(name: "Badminton", icon: Icons.sports_tennis),
+    // SportModel(name: "Volleyball", icon: Icons.sports_volleyball),
+    // SportModel(name: "Tennis", icon: Icons.sports_tennis),
   ];
 
   List<FacilitiesModel> facilities = [
