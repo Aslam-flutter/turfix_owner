@@ -515,6 +515,7 @@ class AddTurfScreen extends StatelessWidget {
                 return;
               }
               TurfModel turfModel = TurfModel(
+                isVerified: 0,
                 ownerId: FirebaseAuth.instance.currentUser!.uid,
                 turfName: turfNameCtr.text.trim(),
                 description: descCtr.text.trim(),

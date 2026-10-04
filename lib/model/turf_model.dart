@@ -1,7 +1,7 @@
 class TurfModel {
   final String? id;
   final String ownerId;
-
+  final int isVerified;
   final String turfName;
   final String description;
   final String location;
@@ -25,6 +25,7 @@ class TurfModel {
 
   TurfModel({
     this.id,
+    required this.isVerified,
     required this.ownerId,
     required this.turfName,
     required this.description,
@@ -50,6 +51,7 @@ class TurfModel {
   factory TurfModel.fromMap(Map<String, dynamic> fromJson, String documentId) {
     return TurfModel(
       id: documentId,
+      isVerified: 0,
       ownerId: fromJson['ownerId'] ?? '',
       turfName: fromJson['turfName'] ?? '',
       description: fromJson['description'] ?? '',
@@ -98,6 +100,7 @@ class TurfModel {
       'longtitude': longtitude,
       'latitude': latitude,
       'ratingTotal': ratingTotal,
+      'isVerified': isVerified,
     };
   }
 }

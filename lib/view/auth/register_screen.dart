@@ -304,6 +304,7 @@ class RegisterScreen extends StatelessWidget {
                         password: passwordCtr.text.trim(),
                         photoUrl: '',
                         role: 'owner',
+                        isAccepted: 0,
                       );
 
                       final cred = await AuthServices().registerOwner(

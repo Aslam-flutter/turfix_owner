@@ -7,7 +7,7 @@ import 'package:turfix_owner/core/constants/app_constants.dart';
 import 'package:turfix_owner/core/services/auth_services.dart';
 import 'package:turfix_owner/model/auth_model.dart';
 import 'package:turfix_owner/view/auth/register_screen.dart';
-import 'package:turfix_owner/view/screens/owner_screens/owner_main_screen.dart';
+import 'package:turfix_owner/view/auth/splash_screen.dart';
 import 'package:turfix_owner/view_model/common_provider.dart';
 import 'package:turfix_owner/widgets/custom_sized_box.dart';
 import 'package:turfix_owner/widgets/scaffold_messanger.dart';
@@ -190,7 +190,7 @@ class LoginScreen extends StatelessWidget {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => OwnerMainScreen(),
+                            builder: (context) => const AuthGate(),
                           ),
                           (route) => false,
                         );

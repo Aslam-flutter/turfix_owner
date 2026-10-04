@@ -6,6 +6,7 @@ class AuthModel {
   final String password;
   final String? photoUrl;
   final String role;
+  final int? isAccepted;
 
   AuthModel({
     required this.uid,
@@ -14,6 +15,7 @@ class AuthModel {
     required this.phone,
     required this.password,
     required this.role,
+    this.isAccepted,
     this.photoUrl,
   });
 
@@ -26,6 +28,7 @@ class AuthModel {
       password: json['password'] ?? '',
       photoUrl: json['photoUrl'],
       role: 'owner',
+      isAccepted: 0,
     );
   }
 
@@ -37,6 +40,7 @@ class AuthModel {
       'phone': phone,
       'photoUrl': photoUrl,
       'role': role,
+      'isAccepted': isAccepted,
     };
   }
 }

@@ -58,6 +58,32 @@ class MyTurfsScreen extends StatelessWidget {
               itemCount: turfDatas.length,
               itemBuilder: (context, index) {
                 final turfDetails = turfDatas[index];
+                final int isVerified =
+                    (turfDetails['isVerified'] as num?)?.toInt() ?? 0;
+
+                final bool isTurfActive = turfDetails['isTurfActive'] ?? false;
+
+                String statusText;
+                Color statusColor;
+
+                if (isVerified == 0) {
+                  statusText = 'Not Verified';
+                  statusColor = Colors.orange;
+                } else if (isVerified == -1) {
+                  statusText = 'Rejected';
+                  statusColor = Colors.red;
+                } else if (isVerified == 1) {
+                  if (isTurfActive) {
+                    statusText = 'Active';
+                    statusColor = primary;
+                  } else {
+                    statusText = 'Inactive';
+                    statusColor = Colors.red;
+                  }
+                } else {
+                  statusText = 'Unknown';
+                  statusColor = Colors.grey;
+                }
                 return InkWell(
                   onTap: () {
                     Navigator.push(
@@ -155,19 +181,13 @@ class MyTurfsScreen extends StatelessWidget {
                                       vertical: 5,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: turfDetails['isTurfActive']
-                                          ? primary.withValues(alpha: .12)
-                                          : Colors.red.withValues(alpha: .12),
+                                      color: statusColor.withOpacity(.2),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
-                                      turfDetails['isTurfActive']
-                                          ? "Active"
-                                          : "Inactive",
+                                      statusText,
                                       style: TextStyle(
-                                        color: turfDetails['isTurfActive']
-                                            ? primary
-                                            : Colors.red,
+                                        color: statusColor,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 12,
                                       ),
