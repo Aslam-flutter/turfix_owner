@@ -25,10 +25,6 @@ class MyTurfsScreen extends StatelessWidget {
           "My Turfs",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
         ),
-        leading: IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-        ),
       ),
 
       body: RefreshIndicator(
@@ -42,7 +38,11 @@ class MyTurfsScreen extends StatelessWidget {
             if (asyncSnapshot.connectionState == ConnectionState.waiting) {
               return SizedBox(
                 height: AppConstants.kHeight(context),
-                child: Center(child: CircularProgressIndicator()),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: const Color(0xff16A34A),
+                  ),
+                ),
               );
             }
 

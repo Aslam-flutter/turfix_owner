@@ -12,11 +12,11 @@ class OwnerDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.read<CommonProvider>();
-    final now = DateTime.now();
+    // final now = DateTime.now();
 
-    final todayStart = DateTime(now.year, now.month, now.day);
+    // final todayStart = DateTime(now.year, now.month, now.day);
 
-    final tomorrowStart = todayStart.add(const Duration(days: 1));
+    // final tomorrowStart = todayStart.add(const Duration(days: 1));
 
     const primary = Color(0xff16A34A);
     final user = FirebaseAuth.instance.currentUser;
@@ -36,10 +36,7 @@ class OwnerDashboardScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-        ),
+
         title: const Text(
           "Dashboard",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
@@ -55,7 +52,14 @@ class OwnerDashboardScreen extends StatelessWidget {
               .get(),
           builder: (context, asyncSnapshot) {
             if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return SizedBox(
+                height: MediaQuery.of(context).size.height * 0.8,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: const Color(0xff16A34A),
+                  ),
+                ),
+              );
             }
 
             if (asyncSnapshot.hasError) {

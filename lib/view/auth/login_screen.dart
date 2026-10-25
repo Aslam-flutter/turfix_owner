@@ -163,53 +163,67 @@ class LoginScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    provider.load(true);
-                    AuthModel authModel = AuthModel(
-                      uid: '',
-                      name: '',
-                      email: emailCtr.text.trim(),
-                      phone: '',
-                      password: passwordCtr.text.trim(),
-                      role: '',
-                    );
+                  try {
+                    if (_formKey.currentState!.validate()) {
+                      provider.load(true);
+                      AuthModel authModel = AuthModel(
+                        uid: '',
+                        name: '',
+                        email: emailCtr.text.trim(),
+                        phone: '',
+                        password: passwordCtr.text.trim(),
+                        role: '',
+                      );
 
-                    final cred = await AuthServices().loginOwner(
-                      authModel,
-                      context,
-                    );
+                      debugPrint('STEP 1: Starting owner login');
 
-                    if (cred != null && cred.user != null) {
-                      final uid = cred.user!.uid;
-                      final doc = await FirebaseFirestore.instance
-                          .collection('owners')
-                          .doc(uid)
-                          .get();
+                      final cred = await AuthServices().loginOwner(
+                        authModel,
+                        context,
+                      );
 
-                      if (doc.exists) {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AuthGate(),
-                          ),
-                          (route) => false,
+                      debugPrint('STEP 2: Firebase login completed');
+
+                      if (cred != null && cred.user != null) {
+                        final uid = cred.user!.uid;
+
+                        debugPrint('STEP 3: Checking owners/$uid');
+
+                        final doc = await FirebaseFirestore.instance
+                            .collection('owners')
+                            .doc(uid)
+                            .get();
+                        debugPrint(
+                          'STEP 4: Owner document exists: ${doc.exists}',
                         );
-                        AppMessenger.customScaffoldMessenger(
-                          context,
-                          message: 'Login successfull',
-                          backgroundColor: Colors.green,
-                        );
-                      } else {
-                        AppMessenger.customScaffoldMessenger(
-                          context,
-                          message:
-                              'Access denied. This account is not registered as a turf owner.',
-                        );
-                        log('Account is not registered as an owner');
+
+                        if (doc.exists) {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AuthGate(),
+                            ),
+                            (route) => false,
+                          );
+                          AppMessenger.customScaffoldMessenger(
+                            context,
+                            message: 'Login successfull',
+                            backgroundColor: Colors.green,
+                          );
+                        } else {
+                          AppMessenger.customScaffoldMessenger(
+                            context,
+                            message:
+                                'Access denied. This account is not registered as a turf owner.',
+                          );
+                          log('Account is not registered as an owner');
+                        }
                       }
+                      provider.load(false);
                     }
+                  } catch (e) {
+                    log(e.toString());
                   }
-                  provider.load(false);
                 },
                 child: provider.isLoading
                     ? SizedBox(

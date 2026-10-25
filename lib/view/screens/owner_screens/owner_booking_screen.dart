@@ -6,9 +6,15 @@ import 'package:provider/provider.dart';
 import 'package:turfix_owner/view/screens/owner_screens/owner_booking_details.dart';
 import 'package:turfix_owner/view_model/common_provider.dart';
 
-class OwnerBookingScreen extends StatelessWidget {
+class OwnerBookingScreen extends StatefulWidget {
   const OwnerBookingScreen({super.key});
 
+  @override
+  State<OwnerBookingScreen> createState() => _OwnerBookingScreenState();
+}
+
+class _OwnerBookingScreenState extends State<OwnerBookingScreen> {
+  String selectedFilter = 'All';
   @override
   Widget build(BuildContext context) {
     // const primary = Color(0xff16A34A);
@@ -22,10 +28,7 @@ class OwnerBookingScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-        ),
+        leading: null,
         title: const Text(
           "Bookings",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
@@ -40,21 +43,24 @@ class OwnerBookingScreen extends StatelessWidget {
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
-                children: [
-                  bookingFilterChip(title: "All", selected: true),
-
-                  const SizedBox(width: 10),
-
-                  bookingFilterChip(title: "Upcoming", selected: false),
-
-                  const SizedBox(width: 10),
-
-                  bookingFilterChip(title: "Completed", selected: false),
-
-                  const SizedBox(width: 10),
-
-                  bookingFilterChip(title: "Cancelled", selected: false),
-                ],
+                children: ['All', 'Upcoming', 'Completed', 'Cancelled'].map((
+                  filter,
+                ) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedFilter = filter;
+                        });
+                      },
+                      child: bookingFilterChip(
+                        title: filter,
+                        selected: selectedFilter == filter,
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
             ),
           ),
@@ -67,7 +73,9 @@ class OwnerBookingScreen extends StatelessWidget {
                   .snapshots(),
               builder: (context, asyncSnapshot) {
                 if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                    child: CircularProgressIndicator(color: Color(0xff16A34A)),
+                  );
                 }
 
                 if (asyncSnapshot.hasError) {
@@ -78,7 +86,39 @@ class OwnerBookingScreen extends StatelessWidget {
                   return const Center(child: Text('No data available'));
                 }
 
-                final bookingDetails = asyncSnapshot.data!.docs;
+                final allBookings = asyncSnapshot.data!.docs;
+
+                final now = DateTime.now();
+
+                final bookingDetails = allBookings.where((doc) {
+                  final booking = doc.data();
+                  final status = provider.getDisplayStatus(booking);
+
+                  if (selectedFilter == 'All') {
+                    return true;
+                  }
+
+                  if (selectedFilter == 'Completed') {
+                    return status == 'Completed';
+                  }
+
+                  if (selectedFilter == 'Cancelled') {
+                    return status == 'Cancelled';
+                  }
+
+                  if (selectedFilter == 'Upcoming') {
+                    final Timestamp? startTimestamp =
+                        booking['startAt'] as Timestamp?;
+
+                    if (startTimestamp == null) return false;
+
+                    return startTimestamp.toDate().isAfter(now) &&
+                        status != 'Cancelled' &&
+                        status != 'Completed';
+                  }
+
+                  return true;
+                }).toList();
 
                 if (bookingDetails.isEmpty) {
                   return const Center(child: Text('No bookings found'));
