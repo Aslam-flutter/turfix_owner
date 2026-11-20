@@ -6,8 +6,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:turfix_owner/core/services/cloudinary_services.dart';
 
 class AddTurfProvider extends ChangeNotifier {
-  String openigTime = 'Select opening time';
-  String closingTime = 'Select closing time';
+  String openigTime = '06:00 AM';
+  String closingTime = '11:00 PM';
 
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -17,39 +17,43 @@ class AddTurfProvider extends ChangeNotifier {
   // Cloudinary URLs
   final List<String?> imageUrls = List.filled(3, null);
 
+  // Uploading state for each image
+  final List<bool> isUploading = List.filled(3, false);
+
   // --------------------------------------------------
   // IMAGE PICK + UPLOAD
   // --------------------------------------------------
 
-  Future<void> pickAndUploadImage(int index) async {
+  Future<void> pickAndUploadImage(int index, {ImageSource source = ImageSource.gallery}) async {
     if (index < 0 || index >= 3) return;
 
     try {
       final pickedImage = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 80,
+        source: source,
+        imageQuality: 85,
       );
 
       if (pickedImage == null) return;
 
-      // Show selected image immediately
+      // Show selected local preview immediately
       selectedImages[index] = pickedImage;
+      isUploading[index] = true;
       notifyListeners();
 
       // Upload to Cloudinary
       final url = await CloudinaryService.uploadImage(pickedImage);
 
-      if (url != null) {
+      if (url != null && url.isNotEmpty) {
         imageUrls[index] = url;
-
-        log('Image ${index + 1} uploaded: $url');
+        log('Image ${index + 1} uploaded successfully: $url');
       } else {
         log('Image ${index + 1} upload failed');
       }
-
-      notifyListeners();
     } catch (e) {
       log('Image upload error: $e');
+    } finally {
+      isUploading[index] = false;
+      notifyListeners();
     }
   }
 
@@ -59,6 +63,10 @@ class AddTurfProvider extends ChangeNotifier {
 
   bool get hasThreeImages {
     return imageUrls.every((url) => url != null && url.isNotEmpty);
+  }
+
+  int get uploadedCount {
+    return imageUrls.where((url) => url != null && url.isNotEmpty).length;
   }
 
   // --------------------------------------------------
@@ -81,6 +89,7 @@ class AddTurfProvider extends ChangeNotifier {
 
     selectedImages[index] = null;
     imageUrls[index] = null;
+    isUploading[index] = false;
 
     notifyListeners();
   }
@@ -90,14 +99,17 @@ class AddTurfProvider extends ChangeNotifier {
   // --------------------------------------------------
 
   Future<void> selectOpeningTime(BuildContext context) async {
+    final TimeOfDay initial = openigTime.contains(':')
+        ? parseTime(openigTime)
+        : const TimeOfDay(hour: 6, minute: 0);
+
     final TimeOfDay? pickedTime = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: initial,
     );
 
     if (pickedTime != null) {
       openigTime = pickedTime.format(context);
-
       notifyListeners();
     }
   }
@@ -107,14 +119,17 @@ class AddTurfProvider extends ChangeNotifier {
   // --------------------------------------------------
 
   Future<void> selectClosingTime(BuildContext context) async {
+    final TimeOfDay initial = closingTime.contains(':')
+        ? parseTime(closingTime)
+        : const TimeOfDay(hour: 23, minute: 0);
+
     final TimeOfDay? pickedTime = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: initial,
     );
 
     if (pickedTime != null) {
       closingTime = pickedTime.format(context);
-
       notifyListeners();
     }
   }
@@ -124,25 +139,58 @@ class AddTurfProvider extends ChangeNotifier {
   // --------------------------------------------------
 
   TimeOfDay parseTime(String time) {
-    final parts = time.trim().split(' ');
+    try {
+      final parts = time.trim().split(' ');
+      final timePart = parts[0];
+      final period = parts.length > 1 ? parts[1].toUpperCase() : 'AM';
 
-    final timePart = parts[0];
-    final period = parts[1].toUpperCase();
+      final timeParts = timePart.split(':');
+      int hour = int.parse(timeParts[0]);
+      final minute = int.parse(timeParts[1]);
 
-    final timeParts = timePart.split(':');
+      if (period == 'PM' && hour != 12) {
+        hour += 12;
+      }
+      if (period == 'AM' && hour == 12) {
+        hour = 0;
+      }
 
-    int hour = int.parse(timeParts[0]);
-    final minute = int.parse(timeParts[1]);
-
-    if (period == 'PM' && hour != 12) {
-      hour += 12;
+      return TimeOfDay(hour: hour, minute: minute);
+    } catch (_) {
+      return const TimeOfDay(hour: 6, minute: 0);
     }
+  }
 
-    if (period == 'AM' && hour == 12) {
-      hour = 0;
+  bool isClosingAfterOpening() {
+    final opening = parseTime(openigTime);
+    final closing = parseTime(closingTime);
+
+    final openMinutes = opening.hour * 60 + opening.minute;
+    final closeMinutes = closing.hour * 60 + closing.minute;
+
+    return closeMinutes > openMinutes;
+  }
+
+  int getEstimatedDailySlots() {
+    final opening = parseTime(openigTime);
+    final closing = parseTime(closingTime);
+
+    final openMinutes = opening.hour * 60 + opening.minute;
+    final closeMinutes = closing.hour * 60 + closing.minute;
+
+    if (closeMinutes <= openMinutes) return 0;
+    return ((closeMinutes - openMinutes) / 60).floor();
+  }
+
+  void resetMedia() {
+    for (int i = 0; i < 3; i++) {
+      selectedImages[i] = null;
+      imageUrls[i] = null;
+      isUploading[i] = false;
     }
-
-    return TimeOfDay(hour: hour, minute: minute);
+    openigTime = '06:00 AM';
+    closingTime = '11:00 PM';
+    notifyListeners();
   }
 
   // --------------------------------------------------
@@ -159,13 +207,11 @@ class AddTurfProvider extends ChangeNotifier {
     final firestore = FirebaseFirestore.instance;
 
     final opening = parseTime(openingTime);
-
     final closing = parseTime(closingTime);
 
     final today = DateTime.now();
 
     WriteBatch batch = firestore.batch();
-
     int batchCount = 0;
 
     for (int day = 0; day < numberOfDays; day++) {
@@ -194,7 +240,6 @@ class AddTurfProvider extends ChangeNotifier {
 
       if (batchCount == 500) {
         await batch.commit();
-
         batch = firestore.batch();
         batchCount = 0;
       }
@@ -240,7 +285,6 @@ class AddTurfProvider extends ChangeNotifier {
 
         if (batchCount == 500) {
           await batch.commit();
-
           batch = firestore.batch();
           batchCount = 0;
         }

@@ -23,6 +23,9 @@ class TurfModel {
   final List<String> facilities;
   final List<String> gameFomats;
 
+  // Structured per-sport configuration: { "Football": { "pricePerHour": 1200.0, "formats": ["5s", "7s"] } }
+  final Map<String, dynamic>? sportsConfig;
+
   TurfModel({
     this.id,
     required this.isVerified,
@@ -38,6 +41,7 @@ class TurfModel {
     required this.sportTypes,
     required this.facilities,
     required this.gameFomats,
+    this.sportsConfig,
     this.ratingTotal,
     this.bookingCount,
     this.isTurfActive,
@@ -51,30 +55,30 @@ class TurfModel {
   factory TurfModel.fromMap(Map<String, dynamic> fromJson, String documentId) {
     return TurfModel(
       id: documentId,
-      isVerified: 0,
+      isVerified: (fromJson['isVerified'] as num?)?.toInt() ?? 0,
       ownerId: fromJson['ownerId'] ?? '',
       turfName: fromJson['turfName'] ?? '',
       description: fromJson['description'] ?? '',
       location: fromJson['location'] ?? '',
-      pricePerHour: (fromJson['pricePerHour'] ?? 0).toDouble(),
+      pricePerHour: ((fromJson['pricePerHour'] as num?) ?? 0).toDouble(),
       openingTime: fromJson['openingTime'] ?? '',
       closingTime: fromJson['closingTime'] ?? '',
       phoneNumber: fromJson['phoneNumber'] ?? '',
-      latitude: fromJson['latitude'] ?? '',
-      longtitude: fromJson['longtitude'] ?? '',
-      isTurfActive: true,
-      bookingCount: 0,
-      rating: 0.00,
-      reviewCount: 0,
-      ratingTotal: 0,
-
+      latitude: (fromJson['latitude'] as num?)?.toDouble(),
+      longtitude:
+          ((fromJson['longtitude'] ?? fromJson['longitude']) as num?)?.toDouble(),
+      isTurfActive: fromJson['isTurfActive'] as bool? ?? true,
+      bookingCount: (fromJson['bookingCount'] as num?)?.toInt() ?? 0,
+      rating: ((fromJson['rating'] as num?) ?? 0.0).toDouble(),
+      reviewCount: (fromJson['reviewCount'] as num?)?.toInt() ?? 0,
+      ratingTotal: (fromJson['ratingTotal'] as num?)?.toInt() ?? 0,
       turfImages: List<String>.from(fromJson['turfImages'] ?? []),
-
       sportTypes: List<String>.from(fromJson['sportTypes'] ?? []),
-
       facilities: List<String>.from(fromJson['facilities'] ?? []),
-
       gameFomats: List<String>.from(fromJson['gameFormats'] ?? []),
+      sportsConfig: fromJson['sportsConfig'] != null
+          ? Map<String, dynamic>.from(fromJson['sportsConfig'])
+          : null,
     );
   }
 
@@ -101,6 +105,7 @@ class TurfModel {
       'latitude': latitude,
       'ratingTotal': ratingTotal,
       'isVerified': isVerified,
+      if (sportsConfig != null) 'sportsConfig': sportsConfig,
     };
   }
 }

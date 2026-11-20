@@ -18,7 +18,13 @@ class _OwnerBookingScreenState extends State<OwnerBookingScreen> {
   @override
   Widget build(BuildContext context) {
     // const primary = Color(0xff16A34A);
-    final ownerId = FirebaseAuth.instance.currentUser!.uid;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return const Scaffold(
+        body: Center(child: Text('Owner is not logged in')),
+      );
+    }
+    final ownerId = user.uid;
     final provider = context.read<CommonProvider>();
 
     return Scaffold(
@@ -127,11 +133,13 @@ class _OwnerBookingScreenState extends State<OwnerBookingScreen> {
                 return ListView.builder(
                   itemCount: bookingDetails.length,
                   itemBuilder: (context, index) {
-                    final booking = bookingDetails[index].data();
+                    final bookingDoc = bookingDetails[index];
+                    final booking = bookingDoc.data();
 
-                    final Timestamp createdAt = booking['createdAt'];
-
-                    final DateTime dateTime = createdAt.toDate();
+                    final Timestamp? createdAt =
+                        booking['createdAt'] as Timestamp?;
+                    final DateTime dateTime =
+                        createdAt?.toDate() ?? DateTime.now();
 
                     final String formattedDate = DateFormat(
                       'd MMM • hh:mm a',
@@ -141,51 +149,59 @@ class _OwnerBookingScreenState extends State<OwnerBookingScreen> {
                     final String month = DateFormat('MMMM').format(dateTime);
                     final int year = dateTime.year;
 
-                    final customer = booking['customerName'];
-                    final sport = booking['sport'];
+                    final customer =
+                        booking['customerName']?.toString() ?? 'Customer';
+                    final sport = booking['sport']?.toString() ?? 'Sport';
 
-                    final List<String> slotIds = List<String>.from(
-                      booking['slotIds'],
-                    );
-
-                    final firstSlot = slotIds.first.split('-');
-                    final lastSlot = slotIds.last.split('-');
-
-                    final firstTime = DateTime(
-                      2026,
-                      1,
-                      1,
-                      int.parse(firstSlot[0]),
-                      int.parse(firstSlot[1]),
-                    );
-
-                    final lastTime = DateTime(
-                      2026,
-                      1,
-                      1,
-                      int.parse(lastSlot[0]),
-                      int.parse(lastSlot[1]),
-                    );
-
-                    final duration = lastTime.difference(firstTime).inHours;
+                    int duration = 1;
+                    if (booking['startAt'] is Timestamp &&
+                        booking['endAt'] is Timestamp) {
+                      final start = (booking['startAt'] as Timestamp).toDate();
+                      final end = (booking['endAt'] as Timestamp).toDate();
+                      duration = end.difference(start).inHours;
+                      if (duration <= 0) duration = 1;
+                    } else if (booking['slotIds'] is List) {
+                      final List<dynamic> slotIds = booking['slotIds'];
+                      if (slotIds.isNotEmpty) {
+                        try {
+                          final firstSlot =
+                              slotIds.first.toString().split('-');
+                          final lastSlot = slotIds.last.toString().split('-');
+                          final firstTime = DateTime(
+                            2026,
+                            1,
+                            1,
+                            int.parse(firstSlot[0]),
+                            int.parse(firstSlot[1]),
+                          );
+                          final lastTime = DateTime(
+                            2026,
+                            1,
+                            1,
+                            int.parse(lastSlot[0]),
+                            int.parse(lastSlot[1]),
+                          );
+                          duration = lastTime.difference(firstTime).inHours;
+                          if (duration <= 0) duration = 1;
+                        } catch (_) {
+                          duration = slotIds.length;
+                        }
+                      }
+                    }
 
                     final status = provider.getDisplayStatus(booking);
 
                     Color statusColor;
-
                     switch (status) {
                       case 'Confirmed':
                         statusColor = Colors.orange;
                         break;
-
                       case 'Playing':
                         statusColor = Colors.green;
                         break;
-
                       case 'Completed':
                         statusColor = Colors.grey;
                         break;
-
                       default:
                         statusColor = Colors.grey;
                     }
@@ -195,7 +211,9 @@ class _OwnerBookingScreenState extends State<OwnerBookingScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => OwnerBookingDetailsScreen(),
+                            builder: (context) => OwnerBookingDetailsScreen(
+                              bookingDoc: bookingDoc,
+                            ),
                           ),
                         );
                       },
@@ -212,7 +230,7 @@ class _OwnerBookingScreenState extends State<OwnerBookingScreen> {
                             status: status,
                             color: statusColor,
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                         ],
                       ),
                     );

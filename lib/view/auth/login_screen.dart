@@ -32,17 +32,19 @@ class LoginScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Form(
           key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Align(
-                alignment: Alignment.center,
-                child: Text(
-                  'Welcome Back!',
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 40),
+                Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Welcome Back!',
+                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ),
               Align(
                 alignment: Alignment.center,
                 child: Text(
@@ -175,54 +177,50 @@ class LoginScreen extends StatelessWidget {
                         role: '',
                       );
 
-                      debugPrint('STEP 1: Starting owner login');
-
                       final cred = await AuthServices().loginOwner(
                         authModel,
                         context,
                       );
 
-                      debugPrint('STEP 2: Firebase login completed');
-
                       if (cred != null && cred.user != null) {
                         final uid = cred.user!.uid;
-
-                        debugPrint('STEP 3: Checking owners/$uid');
 
                         final doc = await FirebaseFirestore.instance
                             .collection('owners')
                             .doc(uid)
                             .get();
-                        debugPrint(
-                          'STEP 4: Owner document exists: ${doc.exists}',
-                        );
 
                         if (doc.exists) {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const AuthGate(),
-                            ),
-                            (route) => false,
-                          );
-                          AppMessenger.customScaffoldMessenger(
-                            context,
-                            message: 'Login successfull',
-                            backgroundColor: Colors.green,
-                          );
+                          if (context.mounted) {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const AuthGate(),
+                              ),
+                              (route) => false,
+                            );
+                            AppMessenger.customScaffoldMessenger(
+                              context,
+                              message: 'Login successful',
+                              backgroundColor: Colors.green,
+                            );
+                          }
                         } else {
-                          AppMessenger.customScaffoldMessenger(
-                            context,
-                            message:
-                                'Access denied. This account is not registered as a turf owner.',
-                          );
+                          if (context.mounted) {
+                            AppMessenger.customScaffoldMessenger(
+                              context,
+                              message:
+                                  'Access denied. This account is not registered as a turf owner.',
+                            );
+                          }
                           log('Account is not registered as an owner');
                         }
                       }
-                      provider.load(false);
                     }
                   } catch (e) {
                     log(e.toString());
+                  } finally {
+                    provider.load(false);
                   }
                 },
                 child: provider.isLoading
@@ -273,6 +271,7 @@ class LoginScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

@@ -27,8 +27,8 @@ class AuthModel {
       phone: json['phone'] ?? '',
       password: json['password'] ?? '',
       photoUrl: json['photoUrl'],
-      role: 'owner',
-      isAccepted: 0,
+      role: json['role'] ?? 'owner',
+      isAccepted: (json['isAccepted'] as num?)?.toInt() ?? 0,
     );
   }
 

@@ -8,15 +8,58 @@ import 'package:turfix_owner/widgets/dialog_box.dart';
 import 'package:turfix_owner/widgets/scaffold_messanger.dart';
 
 class AuthServices {
-  Future<UserCredential?> registerOwner(AuthModel authmodel) async {
+  Future<UserCredential?> registerOwner(
+    AuthModel authmodel, [
+    BuildContext? context,
+  ]) async {
     try {
       final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: authmodel.email,
         password: authmodel.password,
       );
       return cred;
+    } on FirebaseAuthException catch (e) {
+      log(e.toString());
+      if (context != null && context.mounted) {
+        String message;
+        switch (e.code) {
+          case 'email-already-in-use':
+            message = 'An owner account already exists with this email address.';
+            break;
+          case 'weak-password':
+            message = 'Password is too weak. Please use at least 6 characters.';
+            break;
+          case 'invalid-email':
+            message = 'Please enter a valid email address.';
+            break;
+          case 'network-request-failed':
+            message = 'Network error. Please check your internet connection.';
+            break;
+          default:
+            message = e.message ?? 'Registration failed. Please try again.';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
     } catch (e) {
       log(e.toString());
+      if (context != null && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Registration error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
     return null;
   }

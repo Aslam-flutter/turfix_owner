@@ -296,38 +296,55 @@ class RegisterScreen extends StatelessWidget {
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       provider.load(true);
-                      AuthModel authModel = AuthModel(
-                        uid: '',
-                        name: nameCtr.text.trim(),
-                        email: emailCtr.text.trim(),
-                        phone: numberCtr.text.trim(),
-                        password: passwordCtr.text.trim(),
-                        photoUrl: '',
-                        role: 'owner',
-                        isAccepted: 0,
-                      );
-
-                      final cred = await AuthServices().registerOwner(
-                        authModel,
-                      );
-
-                      if (cred != null && cred.user != null) {
-                        authModel.uid = cred.user!.uid;
-                        await FirestoreServices().addOwnerDetails(authModel);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => LoginScreen(),
-                          ),
+                      try {
+                        AuthModel authModel = AuthModel(
+                          uid: '',
+                          name: nameCtr.text.trim(),
+                          email: emailCtr.text.trim(),
+                          phone: numberCtr.text.trim(),
+                          password: passwordCtr.text.trim(),
+                          photoUrl: '',
+                          role: 'owner',
+                          isAccepted: 0,
                         );
-                        AppMessenger.customScaffoldMessenger(
+
+                        final cred = await AuthServices().registerOwner(
+                          authModel,
                           context,
-                          message: 'Registration successfull',
-                          backgroundColor: Colors.green,
                         );
+
+                        if (cred != null && cred.user != null) {
+                          authModel.uid = cred.user!.uid;
+                          await FirestoreServices().addOwnerDetails(authModel);
+                          if (context.mounted) {
+                            if (Navigator.canPop(context)) {
+                              Navigator.pop(context);
+                            } else {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => LoginScreen(),
+                                ),
+                              );
+                            }
+                            AppMessenger.customScaffoldMessenger(
+                              context,
+                              message: 'Registration successful',
+                              backgroundColor: Colors.green,
+                            );
+                          }
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          AppMessenger.customScaffoldMessenger(
+                            context,
+                            message: 'Registration failed: $e',
+                          );
+                        }
+                      } finally {
+                        provider.load(false);
                       }
                     }
-                    provider.load(false);
                   },
                   child: provider.isLoading
                       ? SizedBox(
@@ -356,12 +373,16 @@ class RegisterScreen extends StatelessWidget {
                     ),
                     InkWell(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => LoginScreen(),
-                          ),
-                        );
+                        if (Navigator.canPop(context)) {
+                          Navigator.pop(context);
+                        } else {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LoginScreen(),
+                            ),
+                          );
+                        }
                       },
                       child: Text(
                         'Login',

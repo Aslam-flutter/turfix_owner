@@ -5,20 +5,27 @@ import 'package:turfix_owner/view/screens/owner_screens/owner_dash_board.dart';
 import 'package:turfix_owner/view/screens/owner_screens/owner_profile_screen.dart';
 
 class OwnerMainScreen extends StatefulWidget {
-  const OwnerMainScreen({super.key});
+  final int initialIndex;
+  const OwnerMainScreen({super.key, this.initialIndex = 0});
 
   @override
   State<OwnerMainScreen> createState() => _OwnerMainScreenState();
 }
 
 class _OwnerMainScreenState extends State<OwnerMainScreen> {
-  int selectedIndex = 0;
+  late int selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedIndex = widget.initialIndex;
+  }
 
   final List<Widget> pages = const [
-    Center(child: OwnerDashboardScreen()),
-    Center(child: MyTurfsScreen()),
-    Center(child: OwnerBookingScreen()),
-    Center(child: OwnerProfileScreen()),
+    OwnerDashboardScreen(),
+    MyTurfsScreen(),
+    OwnerBookingScreen(),
+    OwnerProfileScreen(),
   ];
 
   @override
@@ -26,7 +33,10 @@ class _OwnerMainScreenState extends State<OwnerMainScreen> {
     // const primary = Color(0xff16A34A);
 
     return Scaffold(
-      body: pages[selectedIndex],
+      body: IndexedStack(
+        index: selectedIndex,
+        children: pages,
+      ),
 
       bottomNavigationBar: SafeArea(
         child: Padding(
